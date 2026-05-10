@@ -18,7 +18,7 @@ export default function Navbar() {
             <a href="#depoimentos" className="hover:text-primary-700 transition-colors">Depoimentos</a>
           </div>
           <div className="flex items-center gap-3">
-            <Link to="/login" className="hidden sm:block text-sm font-medium text-gray-600 hover:text-primary-700 transition-colors">Entrar</Link>
+            <Link to="/login" className="text-sm font-medium text-gray-600 hover:text-primary-700 transition-colors">Entrar</Link>
             <a href="#planos" className="gradient-primary text-white text-sm font-semibold px-4 py-2 rounded-full hover:opacity-90 transition-opacity">
               Começar grátis
             </a>
