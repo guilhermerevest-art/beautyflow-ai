@@ -4,12 +4,14 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import DashboardLayout from '../layouts/DashboardLayout'
 import { Spinner } from '../components/ui/Spinner'
+import AgendamentoModal from '../components/AgendamentoModal'
 
 export default function Dashboard() {
   const { profissional, studio, isDona } = useAuth()
   const [metrics, setMetrics] = useState(null)
   const [agendamentosHoje, setAgendamentosHoje] = useState([])
   const [loading, setLoading] = useState(true)
+  const [modalAgendar, setModalAgendar] = useState(false)
 
   useEffect(() => {
     if (!studio) return
@@ -162,6 +164,22 @@ export default function Dashboard() {
           </div>
         </>
       )}
+
+      {/* Botão flutuante agendar — mobile */}
+      <button
+        onClick={() => setModalAgendar(true)}
+        className="lg:hidden fixed bottom-20 right-4 z-30 w-14 h-14 gradient-primary rounded-full shadow-lg shadow-primary-300 flex items-center justify-center text-white text-2xl hover:opacity-90 transition-opacity"
+        aria-label="Novo agendamento"
+      >
+        +
+      </button>
+
+      <AgendamentoModal
+        open={modalAgendar}
+        onClose={() => setModalAgendar(false)}
+        onSaved={() => { setModalAgendar(false); loadDashboard() }}
+        profissionalId={profissional?.id}
+      />
     </DashboardLayout>
   )
 }
