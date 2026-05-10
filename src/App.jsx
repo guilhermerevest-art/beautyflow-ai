@@ -8,6 +8,8 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Clientes from './pages/Clientes'
 import Servicos from './pages/Servicos'
+import Agenda from './pages/Agenda'
+import AgendamentoPublico from './pages/AgendamentoPublico'
 
 export default function App() {
   const init = useAuthStore(s => s.init)
@@ -25,8 +27,8 @@ export default function App() {
         <Route path="/clientes" element={<ProtectedRoute><Clientes /></ProtectedRoute>} />
         <Route path="/servicos" element={<ProtectedRoute><RoleRoute role="dona"><Servicos /></RoleRoute></ProtectedRoute>} />
 
-        {/* Rotas das próximas fases — placeholder */}
-        <Route path="/agenda" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/agenda" element={<ProtectedRoute><Agenda /></ProtectedRoute>} />
+        <Route path="/agendar/:slug" element={<AgendamentoPublico />} />
         <Route path="/financeiro" element={<ProtectedRoute><RoleRoute role="dona"><Dashboard /></RoleRoute></ProtectedRoute>} />
         <Route path="/produtos" element={<ProtectedRoute><RoleRoute role="dona"><Dashboard /></RoleRoute></ProtectedRoute>} />
         <Route path="/pacotes" element={<ProtectedRoute><RoleRoute role="dona"><Dashboard /></RoleRoute></ProtectedRoute>} />
