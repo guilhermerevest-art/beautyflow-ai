@@ -10,8 +10,8 @@ import { Button } from '../components/ui/Button'
 import { useAuth } from '../hooks/useAuth'
 
 const schema = z.object({
-  email: z.string().min(1, 'Por favor, informe seu e-mail').email('E-mail inválido. Verifique e tente novamente.'),
-  password: z.string().min(1, 'Por favor, informe sua senha').min(6, 'A senha precisa ter pelo menos 6 caracteres'),
+  email: z.string({ required_error: 'Por favor, informe seu e-mail', invalid_type_error: 'Por favor, informe seu e-mail' }).min(1, 'Por favor, informe seu e-mail').email('E-mail inválido. Verifique e tente novamente.'),
+  password: z.string({ required_error: 'Por favor, informe sua senha', invalid_type_error: 'Por favor, informe sua senha' }).min(1, 'Por favor, informe sua senha').min(6, 'A senha precisa ter pelo menos 6 caracteres'),
 })
 
 export default function Login() {
