@@ -30,15 +30,15 @@ export default function Login() {
       await signIn(email, password)
       navigate('/dashboard')
     } catch (err) {
+      console.error('LOGIN ERROR:', JSON.stringify({ message: err.message, code: err.code, status: err.status, details: err.details }, null, 2))
       const msg = err.message?.toLowerCase() || ''
       if (msg.includes('invalid') || msg.includes('credentials') || msg.includes('password')) {
         toast.error('E-mail ou senha incorretos. Verifique e tente novamente.')
       } else if (msg.includes('email not confirmed')) {
         toast.error('Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada.')
       } else {
-        toast.error('Não foi possível entrar agora. Tente novamente em instantes.')
+        toast.error(`Erro: ${err.message}`)
       }
-      console.error(err)
     } finally {
       setLoading(false)
     }

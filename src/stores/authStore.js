@@ -39,7 +39,7 @@ export const useAuthStore = create((set, get) => ({
         studio: prof.estudoEstetica_studio,
       })
     } catch (err) {
-      console.error('Erro ao carregar profissional:', err)
+      console.error('LOAD_PROFISSIONAL ERROR:', JSON.stringify({ message: err.message, code: err.code, details: err.details, hint: err.hint }, null, 2))
       set({ user: null, profissional: null, studio: null })
     }
   },
