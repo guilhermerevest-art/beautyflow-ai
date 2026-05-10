@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply font-sans text-gray-900 antialiased;
+  }
+}
+
+@layer utilities {
+  .gradient-primary {
+    background: linear-gradient(135deg, #be185d 0%, #9d174d 100%);
+  }
+  .gradient-hero {
+    background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 50%, #fff 100%);
+  }
+  .text-gradient {
+    background: linear-gradient(135deg, #be185d, #9d174d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
