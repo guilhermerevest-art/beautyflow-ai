@@ -10,6 +10,7 @@ import Clientes from './pages/Clientes'
 import Servicos from './pages/Servicos'
 import Agenda from './pages/Agenda'
 import AgendamentoPublico from './pages/AgendamentoPublico'
+import Financeiro from './pages/Financeiro'
 
 export default function App() {
   const init = useAuthStore(s => s.init)
@@ -29,7 +30,7 @@ export default function App() {
 
         <Route path="/agenda" element={<ProtectedRoute><Agenda /></ProtectedRoute>} />
         <Route path="/agendar/:slug" element={<AgendamentoPublico />} />
-        <Route path="/financeiro" element={<ProtectedRoute><RoleRoute role="dona"><Dashboard /></RoleRoute></ProtectedRoute>} />
+        <Route path="/financeiro" element={<ProtectedRoute><RoleRoute role="dona"><Financeiro /></RoleRoute></ProtectedRoute>} />
         <Route path="/produtos" element={<ProtectedRoute><RoleRoute role="dona"><Dashboard /></RoleRoute></ProtectedRoute>} />
         <Route path="/pacotes" element={<ProtectedRoute><RoleRoute role="dona"><Dashboard /></RoleRoute></ProtectedRoute>} />
         <Route path="/reativacao" element={<ProtectedRoute><RoleRoute role="dona"><Dashboard /></RoleRoute></ProtectedRoute>} />

@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import { Modal } from './ui/Modal'
 import { Button } from './ui/Button'
 import { Badge } from './ui/Badge'
+import PagamentoModal from './PagamentoModal'
 
 const STATUS_LABEL = {
   agendado: { label: 'Agendado', variant: 'primary' },
@@ -16,6 +17,7 @@ const STATUS_LABEL = {
 export default function AgendamentoDetalhe({ agendamento: ag, onClose, onUpdated }) {
   const { isDona } = useAuth()
   const [loading, setLoading] = useState(false)
+  const [pagamentoOpen, setPagamentoOpen] = useState(false)
 
   const updateStatus = async (status) => {
     setLoading(true)
@@ -98,8 +100,8 @@ export default function AgendamentoDetalhe({ agendamento: ag, onClose, onUpdated
               </Button>
             )}
             {(ag.status === 'agendado' || ag.status === 'confirmado') && isDona && (
-              <Button onClick={() => updateStatus('concluido')} disabled={loading} className="flex-1">
-                Concluir
+              <Button onClick={() => setPagamentoOpen(true)} disabled={loading} className="flex-1">
+                Registrar pagamento
               </Button>
             )}
             <Button variant="danger" onClick={() => updateStatus('cancelado')} disabled={loading} className="flex-1">
@@ -108,6 +110,13 @@ export default function AgendamentoDetalhe({ agendamento: ag, onClose, onUpdated
           </div>
         )}
       </div>
+
+      <PagamentoModal
+        open={pagamentoOpen}
+        onClose={() => setPagamentoOpen(false)}
+        agendamento={ag}
+        onSaved={() => { setPagamentoOpen(false); onUpdated() }}
+      />
     </Modal>
   )
 }
