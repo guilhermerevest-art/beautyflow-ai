@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 export default function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-primary-100">
@@ -16,7 +18,7 @@ export default function Navbar() {
             <a href="#depoimentos" className="hover:text-primary-700 transition-colors">Depoimentos</a>
           </div>
           <div className="flex items-center gap-3">
-            <a href="#" className="hidden sm:block text-sm font-medium text-gray-600 hover:text-primary-700 transition-colors">Entrar</a>
+            <Link to="/login" className="hidden sm:block text-sm font-medium text-gray-600 hover:text-primary-700 transition-colors">Entrar</Link>
             <a href="#planos" className="gradient-primary text-white text-sm font-semibold px-4 py-2 rounded-full hover:opacity-90 transition-opacity">
               Começar grátis
             </a>
