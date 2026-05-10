@@ -48,7 +48,7 @@ export default function Login() {
       <h1 className="text-2xl font-bold text-gray-900 mb-1">Entrar</h1>
       <p className="text-gray-500 text-sm mb-6">Acesse o painel do seu estúdio</p>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <Input
           label="Email"
           type="email"

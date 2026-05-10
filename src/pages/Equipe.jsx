@@ -163,7 +163,7 @@ export default function Equipe() {
       )}
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nova ajudante">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
           <Input label="Nome completo" placeholder="Ex: Maria Silva" error={errors.nome?.message} {...register('nome')} />
           <Input label="Email" type="email" placeholder="maria@email.com" error={errors.email?.message} {...register('email')} />
           <Input label="Senha inicial" type="password" placeholder="Mínimo 6 caracteres" error={errors.senha?.message} {...register('senha')} />
