@@ -87,7 +87,7 @@ export default function ReativacaoIA() {
 
       toast.success(`${resultado.length} cliente(s) inativo(s) encontrado(s)`)
     } catch (err) {
-      toast.error('Erro ao analisar clientes')
+      toast.error('Não foi possível analisar as clientes. Tente novamente.')
       console.error(err)
     } finally {
       setLoading(false)

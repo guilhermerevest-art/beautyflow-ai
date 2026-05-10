@@ -10,8 +10,8 @@ import { Button } from '../components/ui/Button'
 import { useAuth } from '../hooks/useAuth'
 
 const schema = z.object({
-  email: z.string().email('Email inválido'),
-  password: z.string().min(6, 'Mínimo 6 caracteres'),
+  email: z.string().min(1, 'Por favor, informe seu e-mail').email('E-mail inválido. Verifique e tente novamente.'),
+  password: z.string().min(1, 'Por favor, informe sua senha').min(6, 'A senha precisa ter pelo menos 6 caracteres'),
 })
 
 export default function Login() {
@@ -29,7 +29,14 @@ export default function Login() {
       await signIn(email, password)
       navigate('/dashboard')
     } catch (err) {
-      toast.error('Email ou senha incorretos')
+      const msg = err.message?.toLowerCase() || ''
+      if (msg.includes('invalid') || msg.includes('credentials') || msg.includes('password')) {
+        toast.error('E-mail ou senha incorretos. Verifique e tente novamente.')
+      } else if (msg.includes('email not confirmed')) {
+        toast.error('Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada.')
+      } else {
+        toast.error('Não foi possível entrar agora. Tente novamente em instantes.')
+      }
       console.error(err)
     } finally {
       setLoading(false)

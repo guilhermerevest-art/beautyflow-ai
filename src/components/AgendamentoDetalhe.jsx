@@ -27,10 +27,10 @@ export default function AgendamentoDetalhe({ agendamento: ag, onClose, onUpdated
         .update({ status })
         .eq('id', ag.id)
       if (error) throw error
-      toast.success(`Agendamento ${STATUS_LABEL[status].label.toLowerCase()}`)
+      toast.success(`Status atualizado para: ${STATUS_LABEL[status].label}`)
       onUpdated()
     } catch (err) {
-      toast.error('Erro ao atualizar agendamento')
+      toast.error('Não foi possível atualizar o agendamento. Tente novamente.')
       console.error(err)
     } finally {
       setLoading(false)

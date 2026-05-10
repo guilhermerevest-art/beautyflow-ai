@@ -13,8 +13,8 @@ import { Modal } from '../components/ui/Modal'
 import { Spinner } from '../components/ui/Spinner'
 
 const schema = z.object({
-  nome: z.string().min(2, 'Nome obrigatório'),
-  whatsapp: z.string().min(10, 'WhatsApp inválido').max(20),
+  nome: z.string().min(1, 'Informe o nome da cliente').min(2, 'O nome precisa ter pelo menos 2 letras'),
+  whatsapp: z.string().min(1, 'Informe o WhatsApp da cliente').min(10, 'WhatsApp inválido. Ex: (11) 99999-9999').max(20),
 })
 
 export default function Clientes() {
@@ -40,7 +40,7 @@ export default function Clientes() {
       if (error) throw error
       setClientes(data)
     } catch (err) {
-      toast.error('Erro ao carregar clientes')
+      toast.error('Não foi possível carregar as clientes. Tente novamente.')
       console.error(err)
     } finally {
       setLoading(false)
@@ -66,7 +66,7 @@ export default function Clientes() {
       setModalOpen(false)
       load()
     } catch (err) {
-      toast.error('Erro ao salvar cliente')
+      toast.error('Não foi possível salvar os dados da cliente. Tente novamente.')
       console.error(err)
     }
   }

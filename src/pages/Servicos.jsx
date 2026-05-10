@@ -13,9 +13,9 @@ import { Badge } from '../components/ui/Badge'
 import { Spinner } from '../components/ui/Spinner'
 
 const schema = z.object({
-  nome: z.string().min(2, 'Nome obrigatório'),
-  preco: z.coerce.number().positive('Preço inválido'),
-  duracao_min: z.coerce.number().int().positive('Duração inválida'),
+  nome: z.string().min(1, 'Informe o nome do serviço').min(2, 'O nome precisa ter pelo menos 2 letras'),
+  preco: z.coerce.number({ invalid_type_error: 'Informe um preço válido' }).positive('O preço precisa ser maior que zero'),
+  duracao_min: z.coerce.number({ invalid_type_error: 'Informe a duração em minutos' }).int().positive('A duração precisa ser maior que zero'),
 })
 
 export default function Servicos() {
@@ -40,7 +40,7 @@ export default function Servicos() {
       if (error) throw error
       setServicos(data)
     } catch (err) {
-      toast.error('Erro ao carregar serviços')
+      toast.error('Não foi possível carregar os serviços. Tente novamente.')
       console.error(err)
     } finally {
       setLoading(false)
@@ -66,7 +66,7 @@ export default function Servicos() {
       setModalOpen(false)
       load()
     } catch (err) {
-      toast.error('Erro ao salvar serviço')
+      toast.error('Não foi possível salvar o serviço. Tente novamente.')
       console.error(err)
     }
   }
@@ -78,7 +78,7 @@ export default function Servicos() {
       toast.success(s.ativo ? 'Serviço desativado' : 'Serviço ativado')
       load()
     } catch (err) {
-      toast.error('Erro ao atualizar serviço')
+      toast.error('Não foi possível atualizar o serviço. Tente novamente.')
       console.error(err)
     }
   }

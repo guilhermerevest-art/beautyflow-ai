@@ -14,10 +14,10 @@ import { Spinner } from '../components/ui/Spinner'
 import VendaProdutoModal from '../components/VendaProdutoModal'
 
 const schema = z.object({
-  nome: z.string().min(2, 'Nome obrigatório'),
-  preco: z.coerce.number().min(0, 'Preço inválido'),
-  estoque: z.coerce.number().int().min(0, 'Estoque inválido'),
-  estoque_minimo: z.coerce.number().int().min(0, 'Mínimo inválido'),
+  nome: z.string().min(1, 'Informe o nome do produto').min(2, 'O nome precisa ter pelo menos 2 letras'),
+  preco: z.coerce.number({ invalid_type_error: 'Informe um preço válido' }).min(0, 'O preço não pode ser negativo'),
+  estoque: z.coerce.number({ invalid_type_error: 'Informe a quantidade em estoque' }).int().min(0, 'O estoque não pode ser negativo'),
+  estoque_minimo: z.coerce.number({ invalid_type_error: 'Informe o estoque mínimo' }).int().min(0, 'O mínimo não pode ser negativo'),
 })
 
 export default function Produtos() {
@@ -44,7 +44,7 @@ export default function Produtos() {
       if (error) throw error
       setProdutos(data || [])
     } catch (err) {
-      toast.error('Erro ao carregar produtos')
+      toast.error('Não foi possível carregar os produtos. Tente novamente.')
       console.error(err)
     } finally {
       setLoading(false)
@@ -70,7 +70,7 @@ export default function Produtos() {
       setModalOpen(false)
       load()
     } catch (err) {
-      toast.error('Erro ao salvar produto')
+      toast.error('Não foi possível salvar o produto. Tente novamente.')
       console.error(err)
     }
   }
@@ -82,7 +82,7 @@ export default function Produtos() {
       toast.success(p.ativo ? 'Produto desativado' : 'Produto ativado')
       load()
     } catch (err) {
-      toast.error('Erro ao atualizar produto')
+      toast.error('Não foi possível atualizar o produto. Tente novamente.')
       console.error(err)
     }
   }

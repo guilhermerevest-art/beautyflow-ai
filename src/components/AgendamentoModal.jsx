@@ -84,10 +84,10 @@ export default function AgendamentoModal({ open, onClose, onSaved, profissionalI
         status: 'agendado',
       })
       if (error) throw error
-      toast.success('Agendamento criado')
+      toast.success('Agendamento criado com sucesso!')
       onSaved()
     } catch (err) {
-      toast.error('Erro ao criar agendamento')
+      toast.error('Não foi possível criar o agendamento. Tente novamente.')
       console.error(err)
     }
   }

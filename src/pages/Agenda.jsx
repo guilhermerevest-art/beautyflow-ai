@@ -83,7 +83,7 @@ export default function Agenda() {
       if (error) throw error
       setAgendamentos(data || [])
     } catch (err) {
-      toast.error('Erro ao carregar agenda')
+      toast.error('Não foi possível carregar a agenda. Tente novamente.')
       console.error(err)
     } finally {
       setLoading(false)

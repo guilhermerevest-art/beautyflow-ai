@@ -33,7 +33,7 @@ export default function Financeiro() {
       if (error) throw error
       setPagamentos(pags || [])
     } catch (err) {
-      toast.error('Erro ao carregar caixa')
+      toast.error('Não foi possível carregar o caixa. Tente novamente.')
       console.error(err)
     } finally {
       setLoading(false)
@@ -41,7 +41,7 @@ export default function Financeiro() {
   }
 
   const loadRelatorio = async () => {
-    if (!periodoInicio || !periodoFim) { toast.error('Selecione o período'); return }
+    if (!periodoInicio || !periodoFim) { toast.error('Selecione a data de início e fim do período'); return }
     setLoadingRelatorio(true)
     try {
       const { data: pags, error } = await supabase
@@ -54,7 +54,7 @@ export default function Financeiro() {
       if (error) throw error
       setRelatorioPagamentos(pags || [])
     } catch (err) {
-      toast.error('Erro ao gerar relatório')
+      toast.error('Não foi possível gerar o relatório. Tente novamente.')
       console.error(err)
     } finally {
       setLoadingRelatorio(false)

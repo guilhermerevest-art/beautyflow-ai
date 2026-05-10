@@ -39,7 +39,7 @@ export default function Equipe() {
       if (error) throw error
       setProfissionais(data || [])
     } catch (err) {
-      toast.error('Erro ao carregar equipe')
+      toast.error('Não foi possível carregar a equipe. Tente novamente.')
       console.error(err)
     } finally {
       setLoading(false)
@@ -50,13 +50,14 @@ export default function Equipe() {
 
   const onSubmit = async ({ nome, email, senha }) => {
     try {
-      // Cria usuário no Auth
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      // signUp funciona no frontend com anon key
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password: senha,
-        email_confirm: true,
+        options: { data: { nome } },
       })
       if (authError) throw authError
+      if (!authData.user) throw new Error('Não foi possível criar o acesso.')
 
       // Cria profissional vinculado
       const { error: profError } = await supabase.from('estudoEstetica_profissional').insert({
@@ -67,12 +68,16 @@ export default function Equipe() {
       })
       if (profError) throw profError
 
-      toast.success('Ajudante cadastrada com sucesso')
+      toast.success('Ajudante cadastrada! Ela receberá um e-mail para confirmar o acesso.')
       setModalOpen(false)
       reset()
       load()
     } catch (err) {
-      toast.error(err.message || 'Erro ao cadastrar ajudante')
+      if (err.message?.includes('already registered')) {
+        toast.error('Este e-mail já está cadastrado. Use outro endereço.')
+      } else {
+        toast.error('Não conseguimos cadastrar a ajudante. Tente novamente.')
+      }
       console.error(err)
     }
   }
@@ -87,7 +92,7 @@ export default function Equipe() {
       toast.success(p.ativo ? 'Ajudante desativada' : 'Ajudante ativada')
       load()
     } catch (err) {
-      toast.error('Erro ao atualizar')
+      toast.error('Não foi possível atualizar o status da ajudante. Tente novamente.')
       console.error(err)
     }
   }

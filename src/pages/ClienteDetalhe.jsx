@@ -39,7 +39,7 @@ export default function ClienteDetalhe() {
       setAgendamentos(ags || [])
       setPacotes(pcs || [])
     } catch (err) {
-      toast.error('Erro ao carregar cliente')
+      toast.error('Não foi possível carregar os dados da cliente. Tente novamente.')
       console.error(err)
     } finally {
       setLoading(false)

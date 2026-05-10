@@ -13,10 +13,10 @@ import { Badge } from '../components/ui/Badge'
 import { Spinner } from '../components/ui/Spinner'
 
 const schemaPacote = z.object({
-  nome: z.string().min(2, 'Nome obrigatório'),
-  sessoes: z.coerce.number().int().positive('Sessões inválidas'),
-  preco: z.coerce.number().positive('Preço inválido'),
-  validade_dias: z.coerce.number().int().positive('Validade inválida'),
+  nome: z.string().min(1, 'Informe o nome do pacote').min(2, 'O nome precisa ter pelo menos 2 letras'),
+  sessoes: z.coerce.number({ invalid_type_error: 'Informe a quantidade de sessões' }).int().positive('A quantidade precisa ser maior que zero'),
+  preco: z.coerce.number({ invalid_type_error: 'Informe um preço válido' }).positive('O preço precisa ser maior que zero'),
+  validade_dias: z.coerce.number({ invalid_type_error: 'Informe a validade em dias' }).int().positive('A validade precisa ser maior que zero'),
 })
 
 export default function Pacotes() {
@@ -46,7 +46,7 @@ export default function Pacotes() {
       setPacotesCliente(pcs || [])
       setClientes(cls || [])
     } catch (err) {
-      toast.error('Erro ao carregar pacotes')
+      toast.error('Não foi possível carregar os pacotes. Tente novamente.')
       console.error(err)
     } finally {
       setLoading(false)
@@ -72,7 +72,7 @@ export default function Pacotes() {
       setModalOpen(false)
       load()
     } catch (err) {
-      toast.error('Erro ao salvar pacote')
+      toast.error('Não foi possível salvar o pacote. Tente novamente.')
       console.error(err)
     }
   }
@@ -219,7 +219,7 @@ function VenderPacoteModal({ open, onClose, onSaved, pacotes, clientes }) {
   useEffect(() => { if (open) { setPacoteId(''); setClienteId('') } }, [open])
 
   const confirmar = async () => {
-    if (!pacoteId || !clienteId) { toast.error('Selecione pacote e cliente'); return }
+    if (!pacoteId || !clienteId) { toast.error('Selecione o pacote e a cliente antes de continuar'); return }
     setLoading(true)
     try {
       const pacote = pacotes.find(p => p.id === pacoteId)
@@ -233,10 +233,10 @@ function VenderPacoteModal({ open, onClose, onSaved, pacotes, clientes }) {
         data_expiracao: expiracao.toISOString().split('T')[0],
       })
       if (error) throw error
-      toast.success('Pacote vendido')
+      toast.success('Pacote vendido com sucesso!')
       onSaved()
     } catch (err) {
-      toast.error('Erro ao vender pacote')
+      toast.error('Não foi possível registrar a venda do pacote. Tente novamente.')
       console.error(err)
     } finally {
       setLoading(false)
