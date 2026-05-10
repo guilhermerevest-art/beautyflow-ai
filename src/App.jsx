@@ -16,6 +16,7 @@ import Pacotes from './pages/Pacotes'
 import ReativacaoIA from './pages/ReativacaoIA'
 import ClienteDetalhe from './pages/ClienteDetalhe'
 import Equipe from './pages/Equipe'
+import Configuracoes from './pages/Configuracoes'
 
 export default function App() {
   const init = useAuthStore(s => s.init)
@@ -41,6 +42,7 @@ export default function App() {
         <Route path="/produtos" element={<ProtectedRoute><RoleRoute role="dona"><Produtos /></RoleRoute></ProtectedRoute>} />
         <Route path="/pacotes" element={<ProtectedRoute><RoleRoute role="dona"><Pacotes /></RoleRoute></ProtectedRoute>} />
         <Route path="/reativacao" element={<ProtectedRoute><RoleRoute role="dona"><ReativacaoIA /></RoleRoute></ProtectedRoute>} />
+        <Route path="/configuracoes" element={<ProtectedRoute><RoleRoute role="dona"><Configuracoes /></RoleRoute></ProtectedRoute>} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

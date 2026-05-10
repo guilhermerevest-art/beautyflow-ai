@@ -12,6 +12,7 @@ const navDona = [
   { to: '/pacotes', label: 'Pacotes', icon: '💼' },
   { to: '/equipe', label: 'Equipe', icon: '👩‍💼' },
   { to: '/reativacao', label: 'IA Reativação', icon: '🤖' },
+  { to: '/configuracoes', label: 'Configurações', icon: '⚙️' },
 ]
 
 const navAjudante = [
