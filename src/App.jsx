@@ -14,6 +14,8 @@ import Financeiro from './pages/Financeiro'
 import Produtos from './pages/Produtos'
 import Pacotes from './pages/Pacotes'
 import ReativacaoIA from './pages/ReativacaoIA'
+import ClienteDetalhe from './pages/ClienteDetalhe'
+import Equipe from './pages/Equipe'
 
 export default function App() {
   const init = useAuthStore(s => s.init)
@@ -29,6 +31,8 @@ export default function App() {
 
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/clientes" element={<ProtectedRoute><Clientes /></ProtectedRoute>} />
+        <Route path="/clientes/:id" element={<ProtectedRoute><ClienteDetalhe /></ProtectedRoute>} />
+        <Route path="/equipe" element={<ProtectedRoute><RoleRoute role="dona"><Equipe /></RoleRoute></ProtectedRoute>} />
         <Route path="/servicos" element={<ProtectedRoute><RoleRoute role="dona"><Servicos /></RoleRoute></ProtectedRoute>} />
 
         <Route path="/agenda" element={<ProtectedRoute><Agenda /></ProtectedRoute>} />

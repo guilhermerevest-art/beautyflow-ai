@@ -10,6 +10,7 @@ const navDona = [
   { to: '/financeiro', label: 'Financeiro', icon: '💰' },
   { to: '/produtos', label: 'Produtos', icon: '📦' },
   { to: '/pacotes', label: 'Pacotes', icon: '💼' },
+  { to: '/equipe', label: 'Equipe', icon: '👩‍💼' },
   { to: '/reativacao', label: 'IA Reativação', icon: '🤖' },
 ]
 

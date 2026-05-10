@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'react-hot-toast'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import DashboardLayout from '../layouts/DashboardLayout'
@@ -121,7 +122,9 @@ export default function Clientes() {
                         <div className="w-8 h-8 gradient-primary rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                           {c.nome.charAt(0).toUpperCase()}
                         </div>
-                        <span className="font-medium text-gray-900">{c.nome}</span>
+                        <Link to={`/clientes/${c.id}`} className="font-medium text-gray-900 hover:text-primary-700 transition-colors">
+                          {c.nome}
+                        </Link>
                       </div>
                     </td>
                     <td className="px-5 py-4 text-gray-600">
