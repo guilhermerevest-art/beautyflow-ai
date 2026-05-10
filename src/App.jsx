@@ -12,6 +12,8 @@ import Agenda from './pages/Agenda'
 import AgendamentoPublico from './pages/AgendamentoPublico'
 import Financeiro from './pages/Financeiro'
 import Produtos from './pages/Produtos'
+import Pacotes from './pages/Pacotes'
+import ReativacaoIA from './pages/ReativacaoIA'
 
 export default function App() {
   const init = useAuthStore(s => s.init)
@@ -33,8 +35,8 @@ export default function App() {
         <Route path="/agendar/:slug" element={<AgendamentoPublico />} />
         <Route path="/financeiro" element={<ProtectedRoute><RoleRoute role="dona"><Financeiro /></RoleRoute></ProtectedRoute>} />
         <Route path="/produtos" element={<ProtectedRoute><RoleRoute role="dona"><Produtos /></RoleRoute></ProtectedRoute>} />
-        <Route path="/pacotes" element={<ProtectedRoute><RoleRoute role="dona"><Dashboard /></RoleRoute></ProtectedRoute>} />
-        <Route path="/reativacao" element={<ProtectedRoute><RoleRoute role="dona"><Dashboard /></RoleRoute></ProtectedRoute>} />
+        <Route path="/pacotes" element={<ProtectedRoute><RoleRoute role="dona"><Pacotes /></RoleRoute></ProtectedRoute>} />
+        <Route path="/reativacao" element={<ProtectedRoute><RoleRoute role="dona"><ReativacaoIA /></RoleRoute></ProtectedRoute>} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
