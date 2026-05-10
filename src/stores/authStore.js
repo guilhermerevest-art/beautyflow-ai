@@ -47,6 +47,7 @@ export const useAuthStore = create((set, get) => ({
   signIn: async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) throw error
+    await get().loadProfissional(data.user)
     return data
   },
 
