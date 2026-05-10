@@ -1,6 +1,4 @@
 import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { toast } from 'react-hot-toast'
@@ -9,18 +7,12 @@ import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
 import { useAuth } from '../hooks/useAuth'
 
-const schema = z.object({
-  email: z.string().min(1, 'Por favor, informe seu e-mail').email('E-mail inválido. Verifique e tente novamente.'),
-  password: z.string().min(1, 'Por favor, informe sua senha').min(6, 'A senha precisa ter pelo menos 6 caracteres'),
-})
-
 export default function Login() {
   const { signIn } = useAuth()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
 
   const { register, handleSubmit, formState: { errors } } = useForm({
-    resolver: zodResolver(schema),
     defaultValues: { email: '', password: '' },
   })
 
@@ -54,14 +46,26 @@ const msg = err.message?.toLowerCase() || ''
           type="email"
           placeholder="seu@email.com"
           error={errors.email?.message}
-          {...register('email')}
+          {...register('email', {
+            required: 'Por favor, informe seu e-mail',
+            pattern: {
+              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              message: 'E-mail inválido. Verifique e tente novamente.',
+            },
+          })}
         />
         <Input
           label="Senha"
           type="password"
           placeholder="••••••••"
           error={errors.password?.message}
-          {...register('password')}
+          {...register('password', {
+            required: 'Por favor, informe sua senha',
+            minLength: {
+              value: 6,
+              message: 'A senha precisa ter pelo menos 6 caracteres',
+            },
+          })}
         />
         <Button type="submit" disabled={loading} className="w-full mt-2">
           {loading ? 'Entrando...' : 'Entrar'}
