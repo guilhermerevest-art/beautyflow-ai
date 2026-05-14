@@ -5,6 +5,9 @@ import { useAuth } from '../hooks/useAuth'
 import DashboardLayout from '../layouts/DashboardLayout'
 import { Spinner } from '../components/ui/Spinner'
 import { Badge } from '../components/ui/Badge'
+import { Button } from '../components/ui/Button'
+import { Input } from '../components/ui/Input'
+import { Modal } from '../components/ui/Modal'
 
 const FORMA_LABEL = { dinheiro: '💵 Dinheiro', pix: '📱 Pix', cartao: '💳 Cartão' }
 
@@ -19,7 +22,91 @@ export default function Financeiro() {
   const [loadingRelatorio, setLoadingRelatorio] = useState(false)
   const [tab, setTab] = useState('caixa')
 
+  // Saídas (despesas)
+  const [despesas, setDespesas] = useState([])
+  const [categorias, setCategorias] = useState([])
+  const [loadingDespesas, setLoadingDespesas] = useState(false)
+  const [modalDespesa, setModalDespesa] = useState(false)
+  const [novaDespesa, setNovaDespesa] = useState({ descricao: '', valor: '', categoria_id: '', data: new Date().toISOString().split('T')[0] })
+  const [novaCategoria, setNovaCategoria] = useState('')
+  const [salvandoDespesa, setSalvandoDespesa] = useState(false)
+
   useEffect(() => { if (studio) loadCaixa() }, [studio, data])
+
+  useEffect(() => {
+    if (studio && tab === 'saidas') { loadDespesas(); loadCategorias() }
+  }, [studio, tab])
+
+  const loadCategorias = async () => {
+    const { data: cats } = await supabase
+      .from('estudoEstetica_categoria_despesa')
+      .select('*')
+      .eq('studio_id', studio.id)
+      .order('nome')
+    setCategorias(cats || [])
+  }
+
+  const loadDespesas = async () => {
+    setLoadingDespesas(true)
+    try {
+      const { data: deps, error } = await supabase
+        .from('estudoEstetica_despesa')
+        .select('*, estudoEstetica_categoria_despesa(nome)')
+        .eq('studio_id', studio.id)
+        .order('data', { ascending: false })
+        .limit(50)
+      if (error) throw error
+      setDespesas(deps || [])
+    } catch (err) {
+      toast.error('Não foi possível carregar as saídas.')
+      console.error(err)
+    } finally {
+      setLoadingDespesas(false)
+    }
+  }
+
+  const criarCategoria = async () => {
+    if (!novaCategoria.trim()) return
+    try {
+      const { data: cat, error } = await supabase
+        .from('estudoEstetica_categoria_despesa')
+        .insert({ studio_id: studio.id, nome: novaCategoria.trim() })
+        .select()
+        .single()
+      if (error) throw error
+      setCategorias(prev => [...prev, cat].sort((a, b) => a.nome.localeCompare(b.nome)))
+      setNovaDespesa(d => ({ ...d, categoria_id: cat.id }))
+      setNovaCategoria('')
+      toast.success('Categoria criada!')
+    } catch (err) {
+      toast.error('Não foi possível criar a categoria.')
+      console.error(err)
+    }
+  }
+
+  const salvarDespesa = async () => {
+    if (!novaDespesa.descricao || !novaDespesa.valor) { toast.error('Preencha descrição e valor'); return }
+    setSalvandoDespesa(true)
+    try {
+      const { error } = await supabase.from('estudoEstetica_despesa').insert({
+        studio_id: studio.id,
+        descricao: novaDespesa.descricao,
+        valor: Number(novaDespesa.valor),
+        categoria_id: novaDespesa.categoria_id || null,
+        data: novaDespesa.data,
+      })
+      if (error) throw error
+      toast.success('Saída registrada!')
+      setModalDespesa(false)
+      setNovaDespesa({ descricao: '', valor: '', categoria_id: '', data: new Date().toISOString().split('T')[0] })
+      loadDespesas()
+    } catch (err) {
+      toast.error('Não foi possível registrar a saída.')
+      console.error(err)
+    } finally {
+      setSalvandoDespesa(false)
+    }
+  }
 
   const loadCaixa = async () => {
     setLoading(true)
@@ -93,12 +180,15 @@ export default function Financeiro() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6 w-fit">
-        <button onClick={() => setTab('caixa')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${tab === 'caixa' ? 'bg-white text-primary-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+      <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6 overflow-x-auto">
+        <button onClick={() => setTab('caixa')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'caixa' ? 'bg-white text-primary-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
           Caixa do dia
         </button>
-        <button onClick={() => setTab('relatorio')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${tab === 'relatorio' ? 'bg-white text-primary-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-          Relatório por período
+        <button onClick={() => setTab('saidas')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'saidas' ? 'bg-white text-primary-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+          Saídas
+        </button>
+        <button onClick={() => setTab('relatorio')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${tab === 'relatorio' ? 'bg-white text-primary-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+          Relatório
         </button>
       </div>
 
@@ -252,6 +342,103 @@ export default function Financeiro() {
           )}
         </>
       )}
+
+      {/* Aba Saídas */}
+      {tab === 'saidas' && (
+        <>
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm text-gray-500">{despesas.length} saídas registradas</p>
+            <Button onClick={() => setModalDespesa(true)}>+ Nova saída</Button>
+          </div>
+
+          {loadingDespesas ? (
+            <div className="flex justify-center py-16"><Spinner size="lg" /></div>
+          ) : despesas.length === 0 ? (
+            <div className="text-center py-16 text-gray-400 bg-white rounded-2xl border border-gray-100">
+              <div className="text-4xl mb-3">📤</div>
+              <p className="font-medium">Nenhuma saída registrada</p>
+              <p className="text-sm mt-1">Registre compras de produtos, materiais e despesas</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {despesas.map(d => (
+                <div key={d.id} className="bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center text-lg flex-shrink-0">📤</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-gray-900 text-sm truncate">{d.descricao}</p>
+                    <p className="text-xs text-gray-400">
+                      {d.estudoEstetica_categoria_despesa?.nome || 'Sem categoria'} · {new Date(d.data + 'T12:00:00').toLocaleDateString('pt-BR')}
+                    </p>
+                  </div>
+                  <span className="font-bold text-red-600 text-sm flex-shrink-0">- R$ {Number(d.valor).toFixed(2)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Modal Nova Saída */}
+      <Modal open={modalDespesa} onClose={() => setModalDespesa(false)} title="Registrar saída">
+        <div className="space-y-4">
+          <Input
+            label="Descrição"
+            placeholder="Ex: Compra de creme hidratante"
+            value={novaDespesa.descricao}
+            onChange={e => setNovaDespesa(d => ({ ...d, descricao: e.target.value }))}
+          />
+          <Input
+            label="Valor (R$)"
+            type="number"
+            step="0.01"
+            placeholder="0,00"
+            value={novaDespesa.valor}
+            onChange={e => setNovaDespesa(d => ({ ...d, valor: e.target.value }))}
+          />
+          <div>
+            <label className="text-sm font-medium text-gray-700 block mb-1">Categoria</label>
+            <select
+              value={novaDespesa.categoria_id}
+              onChange={e => setNovaDespesa(d => ({ ...d, categoria_id: e.target.value }))}
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+            >
+              <option value="">Selecione...</option>
+              {categorias.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+            </select>
+            {/* Cadastro rápido de categoria */}
+            <div className="flex gap-2 mt-2">
+              <input
+                placeholder="Nova categoria..."
+                value={novaCategoria}
+                onChange={e => setNovaCategoria(e.target.value)}
+                className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+              />
+              <button
+                type="button"
+                onClick={criarCategoria}
+                className="px-3 py-2 text-xs font-medium text-primary-700 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors"
+              >
+                + Criar
+              </button>
+            </div>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-gray-700 block mb-1">Data</label>
+            <input
+              type="date"
+              value={novaDespesa.data}
+              onChange={e => setNovaDespesa(d => ({ ...d, data: e.target.value }))}
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+            />
+          </div>
+          <div className="flex gap-3 pt-2">
+            <Button type="button" variant="secondary" onClick={() => setModalDespesa(false)} className="flex-1">Cancelar</Button>
+            <Button onClick={salvarDespesa} disabled={salvandoDespesa} className="flex-1">
+              {salvandoDespesa ? 'Salvando...' : 'Registrar'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </DashboardLayout>
   )
 }
