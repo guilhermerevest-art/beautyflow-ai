@@ -95,15 +95,38 @@ export default function Servicos() {
 
       {loading ? (
         <div className="flex justify-center py-16"><Spinner size="lg" /></div>
+      ) : servicos.length === 0 ? (
+        <div className="text-center py-16 text-gray-400 bg-white rounded-2xl border border-gray-100">
+          <div className="text-4xl mb-3">✂️</div>
+          <p className="font-medium">Nenhum serviço cadastrado</p>
+          <p className="text-sm mt-1">Clique em "Novo serviço" para começar</p>
+        </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          {servicos.length === 0 ? (
-            <div className="text-center py-16 text-gray-400">
-              <div className="text-4xl mb-3">✂️</div>
-              <p className="font-medium">Nenhum serviço cadastrado</p>
-              <p className="text-sm mt-1">Clique em "Novo serviço" para começar</p>
-            </div>
-          ) : (
+        <>
+          {/* Mobile: cards */}
+          <div className="lg:hidden space-y-2">
+            {servicos.map(s => (
+              <div key={s.id} className="bg-white rounded-xl border border-gray-100 p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="font-semibold text-gray-900">{s.nome}</p>
+                  <Badge variant={s.ativo ? 'success' : 'default'}>{s.ativo ? 'Ativo' : 'Inativo'}</Badge>
+                </div>
+                <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+                  <span className="font-medium text-gray-900">R$ {Number(s.preco).toFixed(2)}</span>
+                  <span>{s.duracao_min} min</span>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="ghost" onClick={() => openEdit(s)} className="flex-1 text-xs">Editar</Button>
+                  <Button variant={s.ativo ? 'danger' : 'secondary'} onClick={() => toggleAtivo(s)} className="flex-1 text-xs">
+                    {s.ativo ? 'Desativar' : 'Ativar'}
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop: tabela */}
+          <div className="hidden lg:block bg-white rounded-2xl border border-gray-100 overflow-hidden">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>
@@ -135,8 +158,8 @@ export default function Servicos() {
                 ))}
               </tbody>
             </table>
-          )}
-        </div>
+          </div>
+        </>
       )}
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar serviço' : 'Novo serviço'}>

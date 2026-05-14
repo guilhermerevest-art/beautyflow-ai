@@ -109,14 +109,40 @@ export default function Equipe() {
 
       {loading ? (
         <div className="flex justify-center py-16"><Spinner size="lg" /></div>
+      ) : profissionais.length === 0 ? (
+        <div className="text-center py-16 text-gray-400 bg-white rounded-2xl border border-gray-100">
+          <div className="text-4xl mb-3">👥</div>
+          <p className="font-medium">Nenhuma profissional cadastrada</p>
+        </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          {profissionais.length === 0 ? (
-            <div className="text-center py-16 text-gray-400">
-              <div className="text-4xl mb-3">👥</div>
-              <p className="font-medium">Nenhuma profissional cadastrada</p>
-            </div>
-          ) : (
+        <>
+          {/* Mobile: cards */}
+          <div className="lg:hidden space-y-2">
+            {profissionais.map(p => (
+              <div key={p.id} className="bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-3">
+                <div className="w-10 h-10 gradient-primary rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                  {p.nome.charAt(0)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-gray-900 truncate">{p.nome}</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <Badge variant={p.role === 'dona' ? 'primary' : 'default'}>
+                      {p.role === 'dona' ? 'Dona' : 'Ajudante'}
+                    </Badge>
+                    <Badge variant={p.ativo ? 'success' : 'default'}>{p.ativo ? 'Ativa' : 'Inativa'}</Badge>
+                  </div>
+                </div>
+                {p.role !== 'dona' && (
+                  <Button variant={p.ativo ? 'danger' : 'secondary'} onClick={() => toggleAtivo(p)} className="text-xs flex-shrink-0">
+                    {p.ativo ? 'Desativar' : 'Ativar'}
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop: tabela */}
+          <div className="hidden lg:block bg-white rounded-2xl border border-gray-100 overflow-hidden">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>
@@ -158,8 +184,8 @@ export default function Equipe() {
                 ))}
               </tbody>
             </table>
-          )}
-        </div>
+          </div>
+        </>
       )}
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nova ajudante">

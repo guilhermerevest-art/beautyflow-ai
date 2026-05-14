@@ -109,7 +109,7 @@ export default function Financeiro() {
               className="px-4 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400" />
           </div>
 
-          <div className="grid sm:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
             <div className="bg-white rounded-2xl border border-gray-100 p-5">
               <div className="text-sm text-gray-500 mb-1">Total do dia</div>
               <div className="text-2xl font-bold text-gray-900">R$ {totalDia.toFixed(2)}</div>
@@ -130,14 +130,32 @@ export default function Financeiro() {
 
           {loading ? (
             <div className="flex justify-center py-16"><Spinner size="lg" /></div>
+          ) : pagamentos.length === 0 ? (
+            <div className="text-center py-16 text-gray-400 bg-white rounded-2xl border border-gray-100">
+              <div className="text-4xl mb-3">💰</div>
+              <p className="font-medium">Nenhum pagamento neste dia</p>
+            </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-              {pagamentos.length === 0 ? (
-                <div className="text-center py-16 text-gray-400">
-                  <div className="text-4xl mb-3">💰</div>
-                  <p className="font-medium">Nenhum pagamento neste dia</p>
-                </div>
-              ) : (
+            <>
+              {/* Mobile: cards */}
+              <div className="lg:hidden space-y-2">
+                {pagamentos.map(p => (
+                  <div key={p.id} className="bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-3">
+                    <span className="text-sm font-bold text-gray-400 w-12 flex-shrink-0">{p.estudoEstetica_agendamento?.horario?.slice(0,5)}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-900 text-sm truncate">{p.estudoEstetica_agendamento?.estudoEstetica_cliente?.nome || '—'}</p>
+                      <p className="text-xs text-gray-400 truncate">{p.estudoEstetica_agendamento?.estudoEstetica_servico?.nome || '—'}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="font-bold text-gray-900 text-sm">R$ {Number(p.valor).toFixed(2)}</p>
+                      <p className="text-xs text-gray-400">{FORMA_LABEL[p.forma_pagamento]}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop: tabela */}
+              <div className="hidden lg:block bg-white rounded-2xl border border-gray-100 overflow-hidden">
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-100">
                     <tr>
@@ -160,8 +178,8 @@ export default function Financeiro() {
                     ))}
                   </tbody>
                 </table>
-              )}
-            </div>
+              </div>
+            </>
           )}
         </>
       )}
@@ -193,7 +211,7 @@ export default function Financeiro() {
 
           {relatorioPagamentos.length > 0 && (
             <>
-              <div className="grid sm:grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
                 <div className="bg-white rounded-2xl border border-gray-100 p-5">
                   <div className="text-sm text-gray-500 mb-1">Total período</div>
                   <div className="text-2xl font-bold text-primary-700">R$ {relatorioTotal.toFixed(2)}</div>

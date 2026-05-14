@@ -124,14 +124,42 @@ export default function Produtos() {
       {tab === 'estoque' && (
         loading ? (
           <div className="flex justify-center py-16"><Spinner size="lg" /></div>
+        ) : produtos.length === 0 ? (
+          <div className="text-center py-16 text-gray-400 bg-white rounded-2xl border border-gray-100">
+            <div className="text-4xl mb-3">📦</div>
+            <p className="font-medium">Nenhum produto cadastrado</p>
+          </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-            {produtos.length === 0 ? (
-              <div className="text-center py-16 text-gray-400">
-                <div className="text-4xl mb-3">📦</div>
-                <p className="font-medium">Nenhum produto cadastrado</p>
-              </div>
-            ) : (
+          <>
+            {/* Mobile: cards */}
+            <div className="lg:hidden space-y-2">
+              {produtos.map(p => {
+                const baixo = p.ativo && p.estoque <= p.estoque_minimo
+                return (
+                  <div key={p.id} className="bg-white rounded-xl border border-gray-100 p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="font-semibold text-gray-900">{p.nome}</p>
+                      <Badge variant={p.ativo ? 'success' : 'default'}>{p.ativo ? 'Ativo' : 'Inativo'}</Badge>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm mb-3">
+                      <span className="font-medium text-gray-900">R$ {Number(p.preco).toFixed(2)}</span>
+                      <span className={`font-semibold ${baixo ? 'text-amber-600' : 'text-gray-600'}`}>
+                        Estoque: {p.estoque} {baixo && '⚠️'}
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="ghost" onClick={() => openEdit(p)} className="flex-1 text-xs">Editar</Button>
+                      <Button variant={p.ativo ? 'danger' : 'secondary'} onClick={() => toggleAtivo(p)} className="flex-1 text-xs">
+                        {p.ativo ? 'Desativar' : 'Ativar'}
+                      </Button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Desktop: tabela */}
+            <div className="hidden lg:block bg-white rounded-2xl border border-gray-100 overflow-hidden">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-100">
                   <tr>
@@ -171,8 +199,8 @@ export default function Produtos() {
                   })}
                 </tbody>
               </table>
-            )}
-          </div>
+            </div>
+          </>
         )
       )}
 
@@ -230,34 +258,55 @@ function MovimentacaoProdutos({ studioId }) {
           <p className="font-medium">Nenhuma movimentação registrada</p>
         </div>
       ) : (
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-100">
-            <tr>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Data</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Produto</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Cliente</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Tipo</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Qtd</th>
-              <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Valor</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
+        <>
+          {/* Mobile: cards */}
+          <div className="lg:hidden divide-y divide-gray-50">
             {movs.map(m => (
-              <tr key={m.id} className="hover:bg-gray-50">
-                <td className="px-5 py-3 text-sm text-gray-500">{new Date(m.data).toLocaleDateString('pt-BR')}</td>
-                <td className="px-5 py-3 text-sm font-medium text-gray-900">{m.estudoEstetica_produto?.nome}</td>
-                <td className="px-5 py-3 text-sm text-gray-600">{m.estudoEstetica_cliente?.nome || '—'}</td>
-                <td className="px-5 py-3">
-                  <Badge variant={m.tipo === 'venda_avulsa' ? 'primary' : 'default'}>
-                    {m.tipo === 'venda_avulsa' ? 'Venda' : 'Uso'}
-                  </Badge>
-                </td>
-                <td className="px-5 py-3 text-sm text-gray-600">{m.quantidade}</td>
-                <td className="px-5 py-3 text-sm font-semibold text-gray-900 text-right">R$ {Number(m.valor).toFixed(2)}</td>
-              </tr>
+              <div key={m.id} className="p-4 flex items-center gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-gray-900 text-sm truncate">{m.estudoEstetica_produto?.nome}</p>
+                  <p className="text-xs text-gray-400">{m.estudoEstetica_cliente?.nome || '—'} · {new Date(m.data).toLocaleDateString('pt-BR')}</p>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <p className="font-bold text-gray-900 text-sm">R$ {Number(m.valor).toFixed(2)}</p>
+                  <p className="text-xs text-gray-400">{m.tipo === 'venda_avulsa' ? 'Venda' : 'Uso'} · {m.quantidade}x</p>
+                </div>
+              </div>
             ))}
-          </tbody>
-        </table>
+          </div>
+
+          {/* Desktop: tabela */}
+          <div className="hidden lg:block">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-100">
+                <tr>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Data</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Produto</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Cliente</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Tipo</th>
+                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Qtd</th>
+                  <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Valor</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {movs.map(m => (
+                  <tr key={m.id} className="hover:bg-gray-50">
+                    <td className="px-5 py-3 text-sm text-gray-500">{new Date(m.data).toLocaleDateString('pt-BR')}</td>
+                    <td className="px-5 py-3 text-sm font-medium text-gray-900">{m.estudoEstetica_produto?.nome}</td>
+                    <td className="px-5 py-3 text-sm text-gray-600">{m.estudoEstetica_cliente?.nome || '—'}</td>
+                    <td className="px-5 py-3">
+                      <Badge variant={m.tipo === 'venda_avulsa' ? 'primary' : 'default'}>
+                        {m.tipo === 'venda_avulsa' ? 'Venda' : 'Uso'}
+                      </Badge>
+                    </td>
+                    <td className="px-5 py-3 text-sm text-gray-600">{m.quantidade}</td>
+                    <td className="px-5 py-3 text-sm font-semibold text-gray-900 text-right">R$ {Number(m.valor).toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   )
