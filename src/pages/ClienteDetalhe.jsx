@@ -148,32 +148,54 @@ export default function ClienteDetalhe() {
         {agendamentos.length === 0 ? (
           <div className="text-center py-12 text-gray-400 text-sm">Nenhum atendimento registrado</div>
         ) : (
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Data</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Serviço</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Profissional</th>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
-                <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Valor</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
+          <>
+            {/* Mobile: cards */}
+            <div className="lg:hidden divide-y divide-gray-50">
               {agendamentos.map(ag => (
-                <tr key={ag.id} className="hover:bg-gray-50">
-                  <td className="px-5 py-3 text-sm text-gray-600">
-                    {new Date(ag.data + 'T12:00:00').toLocaleDateString('pt-BR')} {ag.horario?.slice(0,5)}
-                  </td>
-                  <td className="px-5 py-3 text-sm font-medium text-gray-900">{ag.estudoEstetica_servico?.nome}</td>
-                  <td className="px-5 py-3 text-sm text-gray-600">{ag.estudoEstetica_profissional?.nome}</td>
-                  <td className="px-5 py-3"><Badge variant={STATUS_BADGE[ag.status]}>{ag.status}</Badge></td>
-                  <td className="px-5 py-3 text-sm font-semibold text-gray-900 text-right">
-                    R$ {Number(ag.estudoEstetica_servico?.preco || 0).toFixed(2)}
-                  </td>
-                </tr>
+                <div key={ag.id} className="px-4 py-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="font-medium text-gray-900 text-sm">{ag.estudoEstetica_servico?.nome}</p>
+                    <Badge variant={STATUS_BADGE[ag.status]}>{ag.status}</Badge>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span>{new Date(ag.data + 'T12:00:00').toLocaleDateString('pt-BR')} às {ag.horario?.slice(0,5)}</span>
+                    <span className="font-semibold text-gray-900">R$ {Number(ag.estudoEstetica_servico?.preco || 0).toFixed(2)}</span>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-0.5">{ag.estudoEstetica_profissional?.nome}</p>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+
+            {/* Desktop: tabela */}
+            <div className="hidden lg:block">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-100">
+                  <tr>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Data</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Serviço</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Profissional</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
+                    <th className="text-right px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Valor</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {agendamentos.map(ag => (
+                    <tr key={ag.id} className="hover:bg-gray-50">
+                      <td className="px-5 py-3 text-sm text-gray-600">
+                        {new Date(ag.data + 'T12:00:00').toLocaleDateString('pt-BR')} {ag.horario?.slice(0,5)}
+                      </td>
+                      <td className="px-5 py-3 text-sm font-medium text-gray-900">{ag.estudoEstetica_servico?.nome}</td>
+                      <td className="px-5 py-3 text-sm text-gray-600">{ag.estudoEstetica_profissional?.nome}</td>
+                      <td className="px-5 py-3"><Badge variant={STATUS_BADGE[ag.status]}>{ag.status}</Badge></td>
+                      <td className="px-5 py-3 text-sm font-semibold text-gray-900 text-right">
+                        R$ {Number(ag.estudoEstetica_servico?.preco || 0).toFixed(2)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </DashboardLayout>

@@ -1,4 +1,4 @@
-# BeautyFlow AI
+# Meu Salão
 
 Sistema de agendamento inteligente para salões e estúdios de estética.
 

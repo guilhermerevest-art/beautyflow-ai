@@ -8,6 +8,7 @@ import { useAuth } from '../hooks/useAuth'
 import { Modal } from './ui/Modal'
 import { Button } from './ui/Button'
 import { Input } from './ui/Input'
+import { maskWhatsApp } from '../utils/masks'
 
 const schema = z.object({
   cliente_id: z.string().min(1, 'Selecione uma cliente'),
@@ -26,6 +27,10 @@ export default function AgendamentoModal({ open, onClose, onSaved, profissionalI
   const [servicos, setServicos] = useState([])
   const [profissionais, setProfissionais] = useState([])
   const [horariosOcupados, setHorariosOcupados] = useState([])
+  const [novaCliente, setNovaCliente] = useState(false)
+  const [nomeCliente, setNomeCliente] = useState('')
+  const [whatsCliente, setWhatsCliente] = useState('')
+  const [salvandoCliente, setSalvandoCliente] = useState(false)
 
   const { register, handleSubmit, watch, reset, setValue, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(schema),
@@ -41,9 +46,12 @@ export default function AgendamentoModal({ open, onClose, onSaved, profissionalI
 
   useEffect(() => {
     if (!open || !studio) return
+    setNovaCliente(false)
+    setNomeCliente('')
+    setWhatsCliente('')
     reset({
-      cliente_id: '',
-      servico_id: '',
+      cliente_id: slotInicial?.clienteId || '',
+      servico_id: slotInicial?.servicoId || '',
       profissional_id: profissionalId || '',
       data: slotInicial?.data || '',
       horario: slotInicial?.horario || '',
@@ -59,6 +67,32 @@ export default function AgendamentoModal({ open, onClose, onSaved, profissionalI
       setProfissionais(p.data || [])
     })
   }, [open, studio])
+
+  const criarClienteRapido = async () => {
+    if (!nomeCliente.trim() || !whatsCliente.trim()) {
+      toast.error('Preencha nome e WhatsApp')
+      return
+    }
+    setSalvandoCliente(true)
+    try {
+      const { data, error } = await supabase.from('estudoEstetica_cliente')
+        .insert({ nome: nomeCliente.trim(), whatsapp: whatsCliente.trim(), studio_id: studio.id })
+        .select('id, nome')
+        .single()
+      if (error) throw error
+      setClientes(prev => [...prev, data].sort((a, b) => a.nome.localeCompare(b.nome)))
+      setValue('cliente_id', data.id)
+      setNovaCliente(false)
+      setNomeCliente('')
+      setWhatsCliente('')
+      toast.success('Cliente cadastrada!')
+    } catch (err) {
+      toast.error('Erro ao cadastrar cliente')
+      console.error(err)
+    } finally {
+      setSalvandoCliente(false)
+    }
+  }
 
   useEffect(() => {
     if (!dataSelecionada || !profSelecionado) return
@@ -96,12 +130,41 @@ export default function AgendamentoModal({ open, onClose, onSaved, profissionalI
     <Modal open={open} onClose={onClose} title="Novo agendamento" size="lg">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label className="text-sm font-medium text-gray-700 block mb-1">Cliente</label>
-          <select className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400" {...register('cliente_id')}>
-            <option value="">Selecione uma cliente</option>
-            {clientes.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
-          </select>
-          {errors.cliente_id && <span className="text-xs text-red-500">{errors.cliente_id.message}</span>}
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-sm font-medium text-gray-700">Cliente</label>
+            <button type="button" onClick={() => setNovaCliente(!novaCliente)} className="text-xs text-primary-600 font-medium hover:text-primary-800">
+              {novaCliente ? 'Selecionar existente' : '+ Nova cliente'}
+            </button>
+          </div>
+          {novaCliente ? (
+            <div className="space-y-2 p-3 bg-gray-50 rounded-xl">
+              <input
+                type="text"
+                placeholder="Nome da cliente"
+                value={nomeCliente}
+                onChange={e => setNomeCliente(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+              />
+              <input
+                type="text"
+                placeholder="WhatsApp (11) 99999-9999"
+                value={whatsCliente}
+                onChange={e => setWhatsCliente(maskWhatsApp(e.target.value))}
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400"
+              />
+              <Button type="button" onClick={criarClienteRapido} disabled={salvandoCliente} className="w-full text-sm">
+                {salvandoCliente ? 'Salvando...' : 'Cadastrar e selecionar'}
+              </Button>
+            </div>
+          ) : (
+            <>
+              <select className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400" {...register('cliente_id')}>
+                <option value="">Selecione uma cliente</option>
+                {clientes.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+              </select>
+              {errors.cliente_id && <span className="text-xs text-red-500">{errors.cliente_id.message}</span>}
+            </>
+          )}
         </div>
 
         <div>
@@ -128,7 +191,7 @@ export default function AgendamentoModal({ open, onClose, onSaved, profissionalI
 
         <div>
           <label className="text-sm font-medium text-gray-700 block mb-1">Horário</label>
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-5 lg:grid-cols-7 gap-1.5">
             {HORARIOS.map(h => {
               const ocupado = horariosOcupados.includes(h)
               return (
@@ -137,7 +200,7 @@ export default function AgendamentoModal({ open, onClose, onSaved, profissionalI
                   type="button"
                   disabled={ocupado}
                   onClick={() => setValue('horario', h)}
-                  className={`py-1.5 text-xs rounded-lg font-medium transition-colors
+                  className={`py-2 text-xs rounded-lg font-medium transition-colors
                     ${watch('horario') === h ? 'gradient-primary text-white' :
                       ocupado ? 'bg-gray-100 text-gray-300 cursor-not-allowed' :
                       'bg-gray-50 text-gray-600 hover:bg-primary-50 hover:text-primary-700'}`}

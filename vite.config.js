@@ -9,8 +9,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icons/*.png'],
       manifest: {
-        name: 'BeautyFlow AI',
-        short_name: 'BeautyFlow',
+        name: 'Meu Salão',
+        short_name: 'MeuSalão',
         description: 'Sistema de agendamento inteligente para salões e estúdios de estética',
         theme_color: '#be185d',
         background_color: '#ffffff',

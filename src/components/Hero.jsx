@@ -13,7 +13,7 @@ export default function Hero() {
               <span className="text-gradient">sem esforço</span>
             </h1>
             <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-              BeautyFlow AI automatiza agendamentos, controla pacotes de sessões e usa IA para reativar clientes que sumiram — tudo em um só lugar.
+              Meu Salão automatiza agendamentos, controla pacotes de sessões e reativa clientes que sumiram — tudo em um só lugar.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <a

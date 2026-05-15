@@ -10,6 +10,8 @@ export default function Dashboard() {
   const { profissional, studio, isDona } = useAuth()
   const [metrics, setMetrics] = useState(null)
   const [agendamentosHoje, setAgendamentosHoje] = useState([])
+  const [aniversariantes, setAniversariantes] = useState([])
+  const [pacotesExpirando, setPacotesExpirando] = useState([])
   const [loading, setLoading] = useState(true)
   const [modalAgendar, setModalAgendar] = useState(false)
 
@@ -25,30 +27,37 @@ export default function Dashboard() {
     const limite15dias = new Date()
     limite15dias.setDate(limite15dias.getDate() - 15)
     const limite15Str = limite15dias.toISOString().split('T')[0]
+    const em7dias = new Date()
+    em7dias.setDate(em7dias.getDate() + 7)
+    const em7diasStr = em7dias.toISOString().split('T')[0]
 
     try {
       const queries = [
-        // Agendamentos hoje
         supabase.from('estudoEstetica_agendamento')
           .select('id, horario, status, estudoEstetica_cliente:cliente_id(nome), estudoEstetica_servico:servico_id(nome, preco)')
           .eq('studio_id', studio.id)
           .eq('data', hoje)
           .neq('status', 'cancelado')
           .order('horario'),
-        // Total clientes
         supabase.from('estudoEstetica_cliente')
           .select('id', { count: 'exact', head: true })
           .eq('studio_id', studio.id),
+        supabase.from('estudoEstetica_cliente')
+          .select('id, nome, data_nascimento, whatsapp')
+          .eq('studio_id', studio.id)
+          .not('data_nascimento', 'is', null),
+        supabase.from('estudoEstetica_pacote_cliente')
+          .select('*, estudoEstetica_pacote_definicao:pacote_id(nome, sessoes), estudoEstetica_cliente:cliente_id(nome)')
+          .lte('data_expiracao', em7diasStr)
+          .gte('data_expiracao', hoje),
       ]
 
       if (isDona) {
         queries.push(
-          // Receita do mês
           supabase.from('estudoEstetica_pagamento')
             .select('valor')
             .eq('studio_id', studio.id)
             .gte('data', inicioMes),
-          // Clientes inativos (sem agendamento nos últimos 15 dias)
           supabase.from('estudoEstetica_agendamento')
             .select('cliente_id')
             .eq('studio_id', studio.id)
@@ -58,9 +67,18 @@ export default function Dashboard() {
       }
 
       const results = await Promise.all(queries)
-      const [agsHoje, totalClientes, pagamentos, agsRecentes] = results
+      const [agsHoje, totalClientes, clientesNasc, pacExp, pagamentos, agsRecentes] = results
 
       setAgendamentosHoje(agsHoje.data || [])
+
+      const mesAtual = new Date().getMonth() + 1
+      const anivs = (clientesNasc.data || []).filter(c => {
+        if (!c.data_nascimento) return false
+        const mes = parseInt(c.data_nascimento.split('-')[1], 10)
+        return mes === mesAtual
+      })
+      setAniversariantes(anivs)
+      setPacotesExpirando(pacExp.data || [])
 
       const receitaMes = isDona
         ? (pagamentos?.data || []).reduce((acc, p) => acc + Number(p.valor), 0)
@@ -133,6 +151,49 @@ export default function Dashboard() {
               </>
             )}
           </div>
+
+          {/* Alertas: aniversariantes e pacotes expirando */}
+          {(aniversariantes.length > 0 || pacotesExpirando.length > 0) && (
+            <div className="space-y-3 mb-6">
+              {aniversariantes.length > 0 && (
+                <div className="bg-pink-50 border border-pink-200 rounded-2xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-lg">🎂</span>
+                    <span className="font-semibold text-pink-800 text-sm">Aniversariantes do mês ({aniversariantes.length})</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {aniversariantes.map(c => (
+                      <a
+                        key={c.id}
+                        href={`https://wa.me/55${c.whatsapp?.replace(/\D/g, '')}?text=${encodeURIComponent(`Feliz aniversário, ${c.nome.split(' ')[0]}! 🎉`)}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-white rounded-full text-xs font-medium text-pink-700 border border-pink-200 hover:bg-pink-100 transition-colors"
+                      >
+                        {c.nome.split(' ')[0]} · {c.data_nascimento?.split('-')[2]}/{c.data_nascimento?.split('-')[1]}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {pacotesExpirando.length > 0 && (
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-lg">⏰</span>
+                    <span className="font-semibold text-amber-800 text-sm">Pacotes expirando em 7 dias ({pacotesExpirando.length})</span>
+                  </div>
+                  <div className="space-y-1">
+                    {pacotesExpirando.map(pc => (
+                      <div key={pc.id} className="flex items-center justify-between text-xs">
+                        <span className="text-amber-700 font-medium">{pc.estudoEstetica_cliente?.nome} — {pc.estudoEstetica_pacote_definicao?.nome}</span>
+                        <span className="text-amber-500">{new Date(pc.data_expiracao + 'T12:00:00').toLocaleDateString('pt-BR')}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Agenda do dia */}
           <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">

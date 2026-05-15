@@ -48,9 +48,9 @@ export default function DashboardLayout({ children }) {
         <div className="px-5 py-5 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 gradient-primary rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">B</span>
+              <span className="text-white font-bold text-sm">M</span>
             </div>
-            <span className="font-bold text-gray-900">BeautyFlow <span className="text-gradient">AI</span></span>
+            <span className="font-bold text-gray-900">Meu Salão</span>
           </div>
           {studio && <p className="text-xs text-gray-400 mt-1 truncate">{studio.nome}</p>}
         </div>
@@ -97,10 +97,10 @@ export default function DashboardLayout({ children }) {
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 gradient-primary rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-xs">B</span>
+            <span className="text-white font-bold text-xs">M</span>
           </div>
           <div>
-            <span className="font-bold text-gray-900 text-sm">BeautyFlow AI</span>
+            <span className="font-bold text-gray-900 text-sm">Meu Salão</span>
             {studio && <p className="text-xs text-gray-400 leading-none">{studio.nome}</p>}
           </div>
         </div>

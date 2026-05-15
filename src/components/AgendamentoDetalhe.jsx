@@ -15,7 +15,7 @@ const STATUS_LABEL = {
   cancelado: { label: 'Cancelado', variant: 'danger' },
 }
 
-export default function AgendamentoDetalhe({ agendamento: ag, onClose, onUpdated }) {
+export default function AgendamentoDetalhe({ agendamento: ag, onClose, onUpdated, onReagendar }) {
   const { isDona, studio } = useAuth()
   const [loading, setLoading] = useState(false)
   const [pagamentoOpen, setPagamentoOpen] = useState(false)
@@ -30,7 +30,11 @@ export default function AgendamentoDetalhe({ agendamento: ag, onClose, onUpdated
         .eq('id', ag.id)
       if (error) throw error
       toast.success(`Status atualizado para: ${STATUS_LABEL[status].label}`)
-      onUpdated()
+      if (status === 'concluido') {
+        setPagamentoOpen(true)
+      } else {
+        onUpdated()
+      }
     } catch (err) {
       toast.error('Não foi possível atualizar o agendamento. Tente novamente.')
       console.error(err)
@@ -119,21 +123,25 @@ export default function AgendamentoDetalhe({ agendamento: ag, onClose, onUpdated
         )}
 
         {ag.status !== 'cancelado' && ag.status !== 'concluido' && (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {ag.status === 'agendado' && (
               <Button variant="secondary" onClick={() => updateStatus('confirmado')} disabled={loading} className="flex-1">
                 Confirmar
               </Button>
             )}
-            {(ag.status === 'agendado' || ag.status === 'confirmado') && isDona && (
-              <Button onClick={() => setPagamentoOpen(true)} disabled={loading} className="flex-1">
-                Registrar pagamento
-              </Button>
-            )}
+            <Button onClick={() => updateStatus('concluido')} disabled={loading} className="flex-1">
+              Concluir
+            </Button>
             <Button variant="danger" onClick={() => updateStatus('cancelado')} disabled={loading} className="flex-1">
               Cancelar
             </Button>
           </div>
+        )}
+
+        {ag.status === 'concluido' && onReagendar && (
+          <Button variant="secondary" onClick={() => onReagendar(ag)} className="w-full">
+            Reagendar (mesmo serviço)
+          </Button>
         )}
       </div>
 

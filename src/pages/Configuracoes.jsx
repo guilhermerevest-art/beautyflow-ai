@@ -102,7 +102,7 @@ export default function Configuracoes() {
     if (!numeroTeste) { toast.error('Informe um número para teste'); return }
     setTesting(true)
     try {
-      await enviarMensagem(config, numeroTeste, '✅ Teste de conexão BeautyFlow AI — funcionando!')
+      await enviarMensagem(config, numeroTeste, '✅ Teste de conexão Meu Salão — funcionando!')
       toast.success('Mensagem enviada! Verifique o WhatsApp.')
     } catch (err) {
       toast.error(err.message)

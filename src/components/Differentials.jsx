@@ -5,7 +5,7 @@ export default function Differentials() {
         <div className="text-center mb-16">
           <span className="text-primary-600 font-semibold text-sm uppercase tracking-wider">Diferenciais</span>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-3 mb-4">
-            Por que BeautyFlow AI é{' '}
+            Por que Meu Salão é{' '}
             <span className="text-gradient">diferente</span>
           </h2>
         </div>
@@ -17,7 +17,7 @@ export default function Differentials() {
           <div className="relative z-10 grid lg:grid-cols-2 gap-8 items-center">
             <div>
               <div className="inline-flex items-center gap-2 bg-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
-                ✨ Exclusivo BeautyFlow AI
+                ✨ Exclusivo Meu Salão
               </div>
               <h3 className="text-2xl sm:text-3xl font-extrabold mb-4">
                 IA que traz suas clientes de volta

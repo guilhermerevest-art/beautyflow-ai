@@ -6,9 +6,9 @@ export default function Footer() {
           <div className="sm:col-span-2">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 gradient-primary rounded-lg flex items-center justify-center">
-                <span className="text-white text-sm font-bold">B</span>
+                <span className="text-white text-sm font-bold">M</span>
               </div>
-              <span className="font-bold text-white text-lg">BeautyFlow AI</span>
+              <span className="font-bold text-white text-lg">Meu Salão</span>
             </div>
             <p className="text-sm leading-relaxed max-w-xs">
               Sistema de agendamento inteligente para salões e estúdios de estética. Simples, bonito e poderoso.
@@ -32,7 +32,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-gray-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
-          <span>© 2026 BeautyFlow AI. Todos os direitos reservados.</span>
+          <span>© 2026 Meu Salão. Todos os direitos reservados.</span>
           <span>Feito com 💕 para profissionais de estética</span>
         </div>
       </div>

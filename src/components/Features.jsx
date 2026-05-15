@@ -42,7 +42,7 @@ export default function Features() {
             <span className="text-gradient">em um só sistema</span>
           </h2>
           <p className="text-gray-500 text-lg max-w-2xl mx-auto">
-            Do agendamento ao financeiro, do estoque à reativação de clientes — BeautyFlow AI cobre cada parte do seu negócio.
+            Do agendamento ao financeiro, do estoque à reativação de clientes — Meu Salão cobre cada parte do seu negócio.
           </p>
         </div>
 

@@ -10,11 +10,14 @@ import DashboardLayout from '../layouts/DashboardLayout'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { Modal } from '../components/ui/Modal'
+import { Badge } from '../components/ui/Badge'
 import { Spinner } from '../components/ui/Spinner'
+import { maskWhatsApp } from '../utils/masks'
 
 const schema = z.object({
   nome: z.string().min(1, 'Informe o nome da cliente').min(2, 'O nome precisa ter pelo menos 2 letras'),
   whatsapp: z.string().min(1, 'Informe o WhatsApp da cliente').min(10, 'WhatsApp inválido. Ex: (11) 99999-9999').max(20),
+  data_nascimento: z.string().optional(),
 })
 
 export default function Clientes() {
@@ -32,13 +35,35 @@ export default function Clientes() {
   const load = async () => {
     setLoading(true)
     try {
-      const { data, error } = await supabase
-        .from('estudoEstetica_cliente')
-        .select('*')
-        .eq('studio_id', studio.id)
-        .order('nome')
+      const [{ data: cls, error }, { data: ultimosAgs }] = await Promise.all([
+        supabase
+          .from('estudoEstetica_cliente')
+          .select('*')
+          .eq('studio_id', studio.id)
+          .order('nome'),
+        supabase
+          .from('estudoEstetica_agendamento')
+          .select('cliente_id, data')
+          .eq('studio_id', studio.id)
+          .neq('status', 'cancelado')
+          .order('data', { ascending: false }),
+      ])
       if (error) throw error
-      setClientes(data)
+      const ultimaVisita = {}
+      ;(ultimosAgs || []).forEach(a => {
+        if (!ultimaVisita[a.cliente_id]) ultimaVisita[a.cliente_id] = a.data
+      })
+      const hoje = new Date()
+      const clientesComStatus = (cls || []).map(c => {
+        const ultima = ultimaVisita[c.id]
+        let inativa = false
+        if (ultima) {
+          const diff = (hoje - new Date(ultima + 'T12:00:00')) / (1000 * 60 * 60 * 24)
+          inativa = diff > 30
+        }
+        return { ...c, inativa }
+      })
+      setClientes(clientesComStatus)
     } catch (err) {
       toast.error('Não foi possível carregar as clientes. Tente novamente.')
       console.error(err)
@@ -49,17 +74,18 @@ export default function Clientes() {
 
   useEffect(() => { if (studio) load() }, [studio])
 
-  const openNew = () => { setEditing(null); reset({ nome: '', whatsapp: '' }); setModalOpen(true) }
-  const openEdit = (c) => { setEditing(c); reset({ nome: c.nome, whatsapp: c.whatsapp }); setModalOpen(true) }
+  const openNew = () => { setEditing(null); reset({ nome: '', whatsapp: '', data_nascimento: '' }); setModalOpen(true) }
+  const openEdit = (c) => { setEditing(c); reset({ nome: c.nome, whatsapp: c.whatsapp, data_nascimento: c.data_nascimento || '' }); setModalOpen(true) }
 
   const onSubmit = async (values) => {
+    const payload = { nome: values.nome, whatsapp: values.whatsapp, data_nascimento: values.data_nascimento || null }
     try {
       if (editing) {
-        const { error } = await supabase.from('estudoEstetica_cliente').update(values).eq('id', editing.id)
+        const { error } = await supabase.from('estudoEstetica_cliente').update(payload).eq('id', editing.id)
         if (error) throw error
         toast.success('Cliente atualizado')
       } else {
-        const { error } = await supabase.from('estudoEstetica_cliente').insert({ ...values, studio_id: studio.id })
+        const { error } = await supabase.from('estudoEstetica_cliente').insert({ ...payload, studio_id: studio.id })
         if (error) throw error
         toast.success('Cliente cadastrado')
       }
@@ -113,7 +139,10 @@ export default function Clientes() {
                     {c.nome.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-semibold text-gray-900 truncate">{c.nome}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-gray-900 truncate">{c.nome}</p>
+                      {c.inativa && <Badge variant="danger">30d+</Badge>}
+                    </div>
                     <p className="text-xs text-gray-400">{new Date(c.criado_em).toLocaleDateString('pt-BR')}</p>
                   </div>
                 </Link>
@@ -183,7 +212,8 @@ export default function Clientes() {
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar cliente' : 'Nova cliente'}>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Input label="Nome completo" placeholder="Ex: Ana Paula Silva" error={errors.nome?.message} {...register('nome')} />
-          <Input label="WhatsApp" placeholder="(11) 99999-9999" error={errors.whatsapp?.message} {...register('whatsapp')} />
+          <Input label="WhatsApp" placeholder="(11) 99999-9999" error={errors.whatsapp?.message} {...register('whatsapp', { onChange: (e) => { e.target.value = maskWhatsApp(e.target.value) } })} />
+          <Input label="Data de nascimento (opcional)" type="date" {...register('data_nascimento')} />
           <div className="flex gap-3 pt-2">
             <Button type="button" variant="secondary" onClick={() => setModalOpen(false)} className="flex-1">Cancelar</Button>
             <Button type="submit" disabled={isSubmitting} className="flex-1">{isSubmitting ? 'Salvando...' : 'Salvar'}</Button>

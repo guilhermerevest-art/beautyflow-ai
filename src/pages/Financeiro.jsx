@@ -19,6 +19,7 @@ export default function Financeiro() {
   const [periodoInicio, setPeriodoInicio] = useState('')
   const [periodoFim, setPeriodoFim] = useState('')
   const [relatorioPagamentos, setRelatorioPagamentos] = useState([])
+  const [relatorioDespesas, setRelatorioDespesas] = useState([])
   const [loadingRelatorio, setLoadingRelatorio] = useState(false)
   const [tab, setTab] = useState('caixa')
 
@@ -131,15 +132,26 @@ export default function Financeiro() {
     if (!periodoInicio || !periodoFim) { toast.error('Selecione a data de início e fim do período'); return }
     setLoadingRelatorio(true)
     try {
-      const { data: pags, error } = await supabase
-        .from('estudoEstetica_pagamento')
-        .select('valor, forma_pagamento, data')
-        .eq('studio_id', studio.id)
-        .gte('data', periodoInicio)
-        .lte('data', periodoFim)
-        .order('data')
+      const [{ data: pags, error }, { data: deps, error: errDeps }] = await Promise.all([
+        supabase
+          .from('estudoEstetica_pagamento')
+          .select('valor, forma_pagamento, data')
+          .eq('studio_id', studio.id)
+          .gte('data', periodoInicio)
+          .lte('data', periodoFim)
+          .order('data'),
+        supabase
+          .from('estudoEstetica_despesa')
+          .select('valor, data')
+          .eq('studio_id', studio.id)
+          .gte('data', periodoInicio)
+          .lte('data', periodoFim)
+          .order('data'),
+      ])
       if (error) throw error
+      if (errDeps) throw errDeps
       setRelatorioPagamentos(pags || [])
+      setRelatorioDespesas(deps || [])
     } catch (err) {
       toast.error('Não foi possível gerar o relatório. Tente novamente.')
       console.error(err)
@@ -338,6 +350,9 @@ export default function Financeiro() {
                   <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-purple-400"></span>Cartão</span>
                 </div>
               </div>
+
+              {/* Gráfico receita vs despesa por semana */}
+              <GraficoSemanal receitas={relatorioPagamentos} despesas={relatorioDespesas} />
             </>
           )}
         </>
@@ -440,5 +455,64 @@ export default function Financeiro() {
         </div>
       </Modal>
     </DashboardLayout>
+  )
+}
+
+function GraficoSemanal({ receitas, despesas }) {
+  const agruparPorSemana = (items) => {
+    const semanas = {}
+    items.forEach(item => {
+      const d = new Date(item.data + 'T12:00:00')
+      const inicio = new Date(d)
+      inicio.setDate(d.getDate() - d.getDay() + 1)
+      const key = inicio.toISOString().split('T')[0]
+      semanas[key] = (semanas[key] || 0) + Number(item.valor)
+    })
+    return semanas
+  }
+
+  const recSemanas = agruparPorSemana(receitas)
+  const despSemanas = agruparPorSemana(despesas)
+  const todasSemanas = [...new Set([...Object.keys(recSemanas), ...Object.keys(despSemanas)])].sort()
+
+  if (todasSemanas.length === 0) return null
+
+  const dados = todasSemanas.map(s => ({
+    semana: s,
+    receita: recSemanas[s] || 0,
+    despesa: despSemanas[s] || 0,
+  }))
+
+  const maxVal = Math.max(...dados.map(d => Math.max(d.receita, d.despesa)), 1)
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-6">
+      <div className="text-sm font-medium text-gray-700 mb-4">Receita vs Despesa por semana</div>
+      <div className="flex items-end gap-2 h-32 overflow-x-auto">
+        {dados.map(d => (
+          <div key={d.semana} className="flex flex-col items-center gap-1 flex-1 min-w-[40px]">
+            <div className="flex items-end gap-0.5 h-24 w-full justify-center">
+              <div
+                className="w-3 bg-green-400 rounded-t"
+                style={{ height: `${(d.receita / maxVal) * 100}%`, minHeight: d.receita > 0 ? '4px' : '0' }}
+                title={`R$ ${d.receita.toFixed(0)}`}
+              />
+              <div
+                className="w-3 bg-red-400 rounded-t"
+                style={{ height: `${(d.despesa / maxVal) * 100}%`, minHeight: d.despesa > 0 ? '4px' : '0' }}
+                title={`R$ ${d.despesa.toFixed(0)}`}
+              />
+            </div>
+            <span className="text-[9px] text-gray-400 whitespace-nowrap">
+              {new Date(d.semana + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+            </span>
+          </div>
+        ))}
+      </div>
+      <div className="flex gap-4 mt-3 text-xs text-gray-500">
+        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-400"></span>Receita</span>
+        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400"></span>Despesa</span>
+      </div>
+    </div>
   )
 }

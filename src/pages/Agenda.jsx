@@ -117,6 +117,22 @@ export default function Agenda() {
     setDiaSelecionado(d)
   }
 
+  const concluirRapido = async (ag, e) => {
+    e.stopPropagation()
+    try {
+      const { error } = await supabase
+        .from('estudoEstetica_agendamento')
+        .update({ status: 'concluido' })
+        .eq('id', ag.id)
+      if (error) throw error
+      toast.success('Concluído!')
+      loadAgendamentos()
+    } catch (err) {
+      toast.error('Erro ao concluir')
+      console.error(err)
+    }
+  }
+
   const agsDia = agendamentos.filter(a => a.data === toDateStr(diaSelecionado))
 
   return (
@@ -191,6 +207,18 @@ export default function Agenda() {
         <>
           {/* Mobile: lista do dia selecionado */}
           <div className="lg:hidden">
+            {/* Mini resumo do dia */}
+            {agsDia.filter(a => a.status !== 'cancelado').length > 0 && (
+              <div className="flex items-center gap-3 mb-3 px-1">
+                <span className="text-xs font-semibold text-gray-600">
+                  {agsDia.filter(a => a.status !== 'cancelado').length} agendamentos
+                </span>
+                <span className="text-xs text-gray-400">·</span>
+                <span className="text-xs font-semibold text-primary-700">
+                  R$ {agsDia.filter(a => a.status !== 'cancelado').reduce((acc, a) => acc + Number(a.estudoEstetica_servico?.preco || 0), 0).toFixed(0)} previsto
+                </span>
+              </div>
+            )}
             <div className="flex items-center justify-between mb-3">
               <h2 className="font-semibold text-gray-800">
                 {diaSelecionado.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
@@ -223,11 +251,25 @@ export default function Agenda() {
                       <p className="font-semibold text-sm truncate">{ag.estudoEstetica_cliente?.nome || '—'}</p>
                       <p className="text-xs opacity-70 truncate">{ag.estudoEstetica_servico?.nome}</p>
                     </div>
-                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                      <span className="text-xs font-medium opacity-60">{STATUS_LABEL[ag.status]}</span>
-                      {ag.estudoEstetica_servico?.preco && (
-                        <span className="text-xs font-bold">R$ {Number(ag.estudoEstetica_servico.preco).toFixed(0)}</span>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {(ag.status === 'agendado' || ag.status === 'confirmado') && (
+                        <span
+                          onClick={(e) => concluirRapido(ag, e)}
+                          className="w-8 h-8 flex items-center justify-center rounded-full bg-white/80 text-green-600 hover:bg-green-100 transition-colors"
+                          role="button"
+                          aria-label="Concluir"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </span>
                       )}
+                      <div className="flex flex-col items-end gap-1">
+                        <span className="text-xs font-medium opacity-60">{STATUS_LABEL[ag.status]}</span>
+                        {ag.estudoEstetica_servico?.preco && (
+                          <span className="text-xs font-bold">R$ {Number(ag.estudoEstetica_servico.preco).toFixed(0)}</span>
+                        )}
+                      </div>
                     </div>
                   </button>
                 )
@@ -303,6 +345,11 @@ export default function Agenda() {
           agendamento={detalhe}
           onClose={() => setDetalhe(null)}
           onUpdated={() => { setDetalhe(null); loadAgendamentos() }}
+          onReagendar={(ag) => {
+            setDetalhe(null)
+            setSlotSelecionado({ data: '', horario: '', clienteId: ag.cliente_id, servicoId: ag.servico_id })
+            setModalNovo(true)
+          }}
         />
       )}
     </DashboardLayout>

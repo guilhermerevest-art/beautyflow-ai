@@ -7,9 +7,9 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 gradient-primary rounded-lg flex items-center justify-center">
-              <span className="text-white text-sm font-bold">B</span>
+              <span className="text-white text-sm font-bold">M</span>
             </div>
-            <span className="font-bold text-gray-900 text-lg">BeautyFlow <span className="text-gradient">AI</span></span>
+            <span className="font-bold text-gray-900 text-lg">Meu Salão</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
             <a href="#funcionalidades" className="hover:text-primary-700 transition-colors">Funcionalidades</a>
