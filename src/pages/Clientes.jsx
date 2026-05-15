@@ -35,7 +35,7 @@ export default function Clientes() {
   const load = async () => {
     setLoading(true)
     try {
-      const [{ data: cls, error }, { data: ultimosAgs }] = await Promise.all([
+      const [{ data: cls, error }, agsResult] = await Promise.all([
         supabase
           .from('estudoEstetica_cliente')
           .select('*')
@@ -49,8 +49,9 @@ export default function Clientes() {
           .order('data', { ascending: false }),
       ])
       if (error) throw error
+      const ultimosAgs = agsResult.data || []
       const ultimaVisita = {}
-      ;(ultimosAgs || []).forEach(a => {
+      ultimosAgs.forEach(a => {
         if (!ultimaVisita[a.cliente_id]) ultimaVisita[a.cliente_id] = a.data
       })
       const hoje = new Date()
@@ -78,7 +79,8 @@ export default function Clientes() {
   const openEdit = (c) => { setEditing(c); reset({ nome: c.nome, whatsapp: c.whatsapp, data_nascimento: c.data_nascimento || '' }); setModalOpen(true) }
 
   const onSubmit = async (values) => {
-    const payload = { nome: values.nome, whatsapp: values.whatsapp, data_nascimento: values.data_nascimento || null }
+    const payload = { nome: values.nome, whatsapp: values.whatsapp }
+    if (values.data_nascimento) payload.data_nascimento = values.data_nascimento
     try {
       if (editing) {
         const { error } = await supabase.from('estudoEstetica_cliente').update(payload).eq('id', editing.id)
