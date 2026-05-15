@@ -79,7 +79,7 @@ export default function Pacotes() {
 
   return (
     <DashboardLayout>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Pacotes</h1>
           <p className="text-gray-500 text-sm mt-0.5">Gerencie pacotes de sessões</p>
@@ -90,7 +90,7 @@ export default function Pacotes() {
         </div>
       </div>
 
-      <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6 w-fit">
+      <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-6 overflow-x-auto">
         <button onClick={() => setTab('definicoes')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${tab === 'definicoes' ? 'bg-white text-primary-700 shadow-sm' : 'text-gray-500'}`}>
           Definições
         </button>
@@ -102,89 +102,145 @@ export default function Pacotes() {
       {loading ? (
         <div className="flex justify-center py-16"><Spinner size="lg" /></div>
       ) : tab === 'definicoes' ? (
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          {pacotes.length === 0 ? (
-            <div className="text-center py-16 text-gray-400">
-              <div className="text-4xl mb-3">💼</div>
-              <p className="font-medium">Nenhum pacote cadastrado</p>
+        pacotes.length === 0 ? (
+          <div className="text-center py-16 text-gray-400 bg-white rounded-2xl border border-gray-100">
+            <div className="text-4xl mb-3">💼</div>
+            <p className="font-medium">Nenhum pacote cadastrado</p>
+          </div>
+        ) : (
+          <>
+            {/* Mobile: cards */}
+            <div className="lg:hidden space-y-2">
+              {pacotes.map(p => (
+                <div key={p.id} className="bg-white rounded-xl border border-gray-100 p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="font-semibold text-gray-900">{p.nome}</p>
+                    <Badge variant={p.ativo ? 'success' : 'default'}>{p.ativo ? 'Ativo' : 'Inativo'}</Badge>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm text-gray-500 mb-3">
+                    <span>{p.sessoes} sessões</span>
+                    <span className="font-medium text-gray-900">R$ {Number(p.preco).toFixed(2)}</span>
+                    <span>{p.validade_dias}d validade</span>
+                  </div>
+                  <Button variant="ghost" onClick={() => openEdit(p)} className="w-full text-xs">Editar</Button>
+                </div>
+              ))}
             </div>
-          ) : (
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-100">
-                <tr>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Pacote</th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Sessões</th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Preço</th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Validade</th>
-                  <th className="px-5 py-3"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {pacotes.map(p => (
-                  <tr key={p.id} className="hover:bg-gray-50">
-                    <td className="px-5 py-4 font-medium text-gray-900">{p.nome}</td>
-                    <td className="px-5 py-4 text-gray-600">{p.sessoes} sessões</td>
-                    <td className="px-5 py-4 text-gray-600">R$ {Number(p.preco).toFixed(2)}</td>
-                    <td className="px-5 py-4 text-gray-600">{p.validade_dias} dias</td>
-                    <td className="px-5 py-4">
-                      <Button variant="ghost" onClick={() => openEdit(p)}>Editar</Button>
-                    </td>
+
+            {/* Desktop: tabela */}
+            <div className="hidden lg:block bg-white rounded-2xl border border-gray-100 overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-100">
+                  <tr>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Pacote</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Sessões</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Preço</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Validade</th>
+                    <th className="px-5 py-3"></th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      ) : (
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          {pacotesCliente.length === 0 ? (
-            <div className="text-center py-16 text-gray-400">
-              <div className="text-4xl mb-3">📋</div>
-              <p className="font-medium">Nenhum pacote vendido ainda</p>
-            </div>
-          ) : (
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-100">
-                <tr>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Cliente</th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Pacote</th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Sessões</th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Compra</th>
-                  <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Expira</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {pacotesCliente.map(pc => {
-                  const total = pc.estudoEstetica_pacote_definicao?.sessoes || 0
-                  const usadas = pc.sessoes_usadas
-                  const expirado = pc.data_expiracao && new Date(pc.data_expiracao) < new Date()
-                  return (
-                    <tr key={pc.id} className="hover:bg-gray-50">
-                      <td className="px-5 py-4 font-medium text-gray-900">{pc.estudoEstetica_cliente?.nome}</td>
-                      <td className="px-5 py-4 text-gray-600">{pc.estudoEstetica_pacote_definicao?.nome}</td>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {pacotes.map(p => (
+                    <tr key={p.id} className="hover:bg-gray-50">
+                      <td className="px-5 py-4 font-medium text-gray-900">{p.nome}</td>
+                      <td className="px-5 py-4 text-gray-600">{p.sessoes} sessões</td>
+                      <td className="px-5 py-4 text-gray-600">R$ {Number(p.preco).toFixed(2)}</td>
+                      <td className="px-5 py-4 text-gray-600">{p.validade_dias} dias</td>
                       <td className="px-5 py-4">
-                        <div className="flex items-center gap-2">
-                          <span className={`font-semibold ${usadas >= total ? 'text-red-600' : 'text-gray-900'}`}>{usadas}/{total}</span>
-                          <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                            <div className="h-full gradient-primary rounded-full" style={{ width: `${Math.min((usadas / total) * 100, 100)}%` }} />
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-5 py-4 text-sm text-gray-500">{new Date(pc.data_compra).toLocaleDateString('pt-BR')}</td>
-                      <td className="px-5 py-4">
-                        {pc.data_expiracao ? (
-                          <Badge variant={expirado ? 'danger' : 'success'}>
-                            {expirado ? 'Expirado' : new Date(pc.data_expiracao).toLocaleDateString('pt-BR')}
-                          </Badge>
-                        ) : '—'}
+                        <Button variant="ghost" onClick={() => openEdit(p)}>Editar</Button>
                       </td>
                     </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          )}
-        </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )
+      ) : (
+        pacotesCliente.length === 0 ? (
+          <div className="text-center py-16 text-gray-400 bg-white rounded-2xl border border-gray-100">
+            <div className="text-4xl mb-3">📋</div>
+            <p className="font-medium">Nenhum pacote vendido ainda</p>
+          </div>
+        ) : (
+          <>
+            {/* Mobile: cards */}
+            <div className="lg:hidden space-y-2">
+              {pacotesCliente.map(pc => {
+                const total = pc.estudoEstetica_pacote_definicao?.sessoes || 0
+                const usadas = pc.sessoes_usadas
+                const expirado = pc.data_expiracao && new Date(pc.data_expiracao) < new Date()
+                return (
+                  <div key={pc.id} className="bg-white rounded-xl border border-gray-100 p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="font-semibold text-gray-900 text-sm">{pc.estudoEstetica_cliente?.nome}</p>
+                      {pc.data_expiracao && (
+                        <Badge variant={expirado ? 'danger' : 'success'}>
+                          {expirado ? 'Expirado' : 'Ativo'}
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 mb-2">{pc.estudoEstetica_pacote_definicao?.nome}</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`text-sm font-semibold ${usadas >= total ? 'text-red-600' : 'text-gray-900'}`}>{usadas}/{total} sessões</span>
+                      <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-full gradient-primary rounded-full" style={{ width: `${Math.min((usadas / total) * 100, 100)}%` }} />
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      Compra: {new Date(pc.data_compra).toLocaleDateString('pt-BR')}
+                      {pc.data_expiracao && ` · Expira: ${new Date(pc.data_expiracao).toLocaleDateString('pt-BR')}`}
+                    </p>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Desktop: tabela */}
+            <div className="hidden lg:block bg-white rounded-2xl border border-gray-100 overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-100">
+                  <tr>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Cliente</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Pacote</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Sessões</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Compra</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Expira</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {pacotesCliente.map(pc => {
+                    const total = pc.estudoEstetica_pacote_definicao?.sessoes || 0
+                    const usadas = pc.sessoes_usadas
+                    const expirado = pc.data_expiracao && new Date(pc.data_expiracao) < new Date()
+                    return (
+                      <tr key={pc.id} className="hover:bg-gray-50">
+                        <td className="px-5 py-4 font-medium text-gray-900">{pc.estudoEstetica_cliente?.nome}</td>
+                        <td className="px-5 py-4 text-gray-600">{pc.estudoEstetica_pacote_definicao?.nome}</td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-2">
+                            <span className={`font-semibold ${usadas >= total ? 'text-red-600' : 'text-gray-900'}`}>{usadas}/{total}</span>
+                            <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                              <div className="h-full gradient-primary rounded-full" style={{ width: `${Math.min((usadas / total) * 100, 100)}%` }} />
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4 text-sm text-gray-500">{new Date(pc.data_compra).toLocaleDateString('pt-BR')}</td>
+                        <td className="px-5 py-4">
+                          {pc.data_expiracao ? (
+                            <Badge variant={expirado ? 'danger' : 'success'}>
+                              {expirado ? 'Expirado' : new Date(pc.data_expiracao).toLocaleDateString('pt-BR')}
+                            </Badge>
+                          ) : '—'}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )
       )}
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editing ? 'Editar pacote' : 'Novo pacote'}>
